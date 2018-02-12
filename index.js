@@ -4,13 +4,13 @@ const _ = require('lodash');
 const numeral = require('numeral');
 const { promisify } = require('util');
 
-const NR_OF_KEYS = 100000;
-const INSERT_BATCH_SIZE = 100000;
+const NR_OF_KEYS = 1000000;
+const INSERT_BATCH_SIZE = 10000;
 const TTL = 10000; // Add TTL just for realism
 const SAMPLE_SIZE = 100; // Number of KEYS and SCAN operations
-const SCAN_BATCH_SIZE = 100; // Number of lookups in one scan
+const SCAN_BATCH_SIZE = 1000; // Number of lookups in one scan
 const LEFT_PAD = 50; // Number of characters (whitespace) before printing response
-const RESULT_PAD = 14; // Number of characters (whitespace) before printing response
+const RESULT_PAD = 14;
 const CHANCE_OF_TWO_ITEMS = 0.1; // We test with "key:item" where some keys have 2 items
 
 client = redis.createClient();
