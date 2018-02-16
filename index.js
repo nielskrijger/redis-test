@@ -16,6 +16,7 @@ const CHANCE_OF_TWO_ITEMS = 0.1; // We test with "key:item" where some keys have
 client = redis.createClient();
 
 const getAsync = promisify(client.get).bind(client);
+const mgetAsync = promisify(client.mget).bind(client);
 const flusdbAsync = promisify(client.flushdb).bind(client);
 const keysAsync = promisify(client.keys).bind(client);
 const scanAsync = promisify(client.scan).bind(client);
@@ -74,7 +75,6 @@ async function keysTest(ids) {
     });
   });
   await Promise.all(promises);
-  // console.log('responseTimes', responseTimes);
   printTime(`Fetched ${ids.length} records using "KEYS <id>:*"`, testTimer.stop());
 }
 
@@ -88,7 +88,6 @@ async function scanTest(ids) {
     });
   });
   await Promise.all(promises);
-  //console.log('responseTimes', responseTimes);
   printTime(`Fetched ${ids.length} records using "SCAN <id>:* COUNT ${SCAN_BATCH_SIZE}"`, testTimer.stop());
 }
 
@@ -112,6 +111,13 @@ async function getTest(ids) {
   printTime(`Fetched ${ids.length} records using "GET <id>"`, testTimer.stop());
 }
 
+async function mgetTest(ids) {
+  const testTimer = new Timer();
+  const newIds = ids.map(e => `${e}:1`);
+  const results = await mgetAsync(newIds);
+  printTime(`Fetched ${results.length} records using "MGET <id1> <id2> ..."`, testTimer.stop());
+}
+
 function sampleIds(ids, count) {
   const sample = new Set();
   while (sample.size < count) {
@@ -126,14 +132,14 @@ function printTime(value, ms) {
 }
 
 async function main() {
-  const timer = new Timer();
-  await flusdbAsync()
+  await flusdbAsync();
   const ids = await generateAll(NR_OF_KEYS);
   console.log('');
   console.log('------ TESTS -------');
   await getTest(sampleIds(ids, SAMPLE_SIZE));
   await keysTest(sampleIds(ids, SAMPLE_SIZE));
   await scanTest(sampleIds(ids, SAMPLE_SIZE));
+  await mgetTest(sampleIds(ids, 50000));
 }
 
 class Timer {
