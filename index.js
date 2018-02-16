@@ -4,7 +4,7 @@ const _ = require('lodash');
 const numeral = require('numeral');
 const { promisify } = require('util');
 
-const NR_OF_KEYS = 1000000;
+const NR_OF_KEYS = 100000;
 const INSERT_BATCH_SIZE = 10000;
 const TTL = 10000; // Add TTL just for realism
 const SAMPLE_SIZE = 100; // Number of KEYS and SCAN operations
@@ -75,7 +75,7 @@ async function keysTest(ids) {
     });
   });
   await Promise.all(promises);
-  printTime(`Fetched ${ids.length} records using "KEYS <id>:*"`, testTimer.stop());
+  printTime(`Executed ${ids.length} "KEYS <id>:*" operations`, testTimer.stop());
 }
 
 async function scanTest(ids) {
@@ -88,7 +88,7 @@ async function scanTest(ids) {
     });
   });
   await Promise.all(promises);
-  printTime(`Fetched ${ids.length} records using "SCAN <id>:* COUNT ${SCAN_BATCH_SIZE}"`, testTimer.stop());
+  printTime(`Executed ${ids.length} "SCAN <id>:* COUNT ${SCAN_BATCH_SIZE}" operations`, testTimer.stop());
 }
 
 async function scan(cursor, pattern) {
@@ -107,7 +107,6 @@ async function getTest(ids) {
     responseTimes.push(timer.stop());
   });
   await Promise.all(promises);
-  // console.log('responseTimes', responseTimes);
   printTime(`Fetched ${ids.length} records using "GET <id>"`, testTimer.stop());
 }
 
@@ -115,7 +114,7 @@ async function mgetTest(ids) {
   const testTimer = new Timer();
   const newIds = ids.map(e => `${e}:1`);
   const results = await mgetAsync(newIds);
-  printTime(`Fetched ${results.length} records using "MGET <id1> <id2> ..."`, testTimer.stop());
+  printTime(`Fetched ${results.length} records using 1 "MGET <id1> <id2> ..."`, testTimer.stop());
 }
 
 function sampleIds(ids, count) {
@@ -139,7 +138,7 @@ async function main() {
   await getTest(sampleIds(ids, SAMPLE_SIZE));
   await keysTest(sampleIds(ids, SAMPLE_SIZE));
   await scanTest(sampleIds(ids, SAMPLE_SIZE));
-  await mgetTest(sampleIds(ids, 50000));
+  await mgetTest(sampleIds(ids, SAMPLE_SIZE));
 }
 
 class Timer {
